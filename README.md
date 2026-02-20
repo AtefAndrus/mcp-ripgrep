@@ -1,6 +1,6 @@
-# @atefandrus/mcp-ripgrep
+# @atef_andrus/mcp-ripgrep
 
-[![npm version](https://img.shields.io/npm/v/@atefandrus/mcp-ripgrep)](https://www.npmjs.com/package/@atefandrus/mcp-ripgrep)
+[![npm version](https://img.shields.io/npm/v/@atef_andrus/mcp-ripgrep)](https://www.npmjs.com/package/@atef_andrus/mcp-ripgrep)
 [![CI](https://github.com/AtefAndrus/mcp-ripgrep/actions/workflows/ci.yml/badge.svg)](https://github.com/AtefAndrus/mcp-ripgrep/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -14,7 +14,7 @@
 ## インストール
 
 ```bash
-npm install @atefandrus/mcp-ripgrep
+npm install @atef_andrus/mcp-ripgrep
 ```
 
 ## 使い方
@@ -28,7 +28,7 @@ MCP クライアントの設定に以下を追加する:
   "mcpServers": {
     "ripgrep": {
       "command": "npx",
-      "args": ["@atefandrus/mcp-ripgrep"]
+      "args": ["@atef_andrus/mcp-ripgrep"]
     }
   }
 }

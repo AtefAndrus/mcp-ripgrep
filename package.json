@@ -1,5 +1,5 @@
 {
-  "name": "@atefandrus/mcp-ripgrep",
+  "name": "@atef_andrus/mcp-ripgrep",
   "version": "1.0.0",
   "description": "MCP server providing ripgrep search capabilities",
   "type": "module",
