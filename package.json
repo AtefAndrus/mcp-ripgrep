@@ -1,0 +1,50 @@
+{
+  "name": "@atefandrus/mcp-ripgrep",
+  "version": "1.0.0",
+  "description": "MCP server providing ripgrep search capabilities",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "bin": {
+    "mcp-ripgrep": "./dist/index.js"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=22"
+  },
+  "author": "AtefAndrus",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AtefAndrus/mcp-ripgrep.git"
+  },
+  "homepage": "https://github.com/AtefAndrus/mcp-ripgrep#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "bun run src/index.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check .",
+    "format": "biome check --write .",
+    "lint": "biome check . && tsc --noEmit",
+    "validate": "bun test && biome check . && tsc --noEmit",
+    "prepublishOnly": "tsc"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "@types/bun": "latest",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  },
+  "keywords": ["mcp", "ripgrep", "rg", "search", "model-context-protocol"],
+  "license": "MIT"
+}
