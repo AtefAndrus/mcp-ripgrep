@@ -19,11 +19,17 @@ export function registerListFilesTool(
       inputSchema: {
         path: z.string().describe("Directory to list files from"),
         fileType: z
-          .string()
+          .union([z.string(), z.array(z.string())])
           .optional()
           .describe("Filter by file type (e.g. 'ts', 'py')"),
-        fileTypeNot: z.string().optional().describe("Exclude file type"),
-        glob: z.string().optional().describe("Glob pattern to filter files"),
+        fileTypeNot: z
+          .union([z.string(), z.array(z.string())])
+          .optional()
+          .describe("Exclude file type"),
+        glob: z
+          .union([z.string(), z.array(z.string())])
+          .optional()
+          .describe("Glob pattern to filter files"),
         includeHidden: z
           .boolean()
           .optional()

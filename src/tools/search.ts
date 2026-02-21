@@ -5,6 +5,7 @@ import { validatePath } from "../path-guard.js";
 import { buildSearchCommand } from "../rg/builder.js";
 import { executeRgCommand } from "../rg/executor.js";
 import type { ServerConfig } from "../server.js";
+import { extractStats } from "../stats.js";
 
 export function registerSearchTool(
   server: McpServer,
@@ -15,7 +16,7 @@ export function registerSearchTool(
     {
       title: "Ripgrep Search",
       description:
-        "Search file contents for a pattern using ripgrep. Supports regex, literal strings, multiline matching, and various filtering options.",
+        "Search file contents for a pattern using ripgrep. Supports regex, literal strings, multiline matching, and various filtering options. For large or unfamiliar codebases, consider using search-count or search-files first to assess the scope of matches.",
       inputSchema: {
         pattern: z.string().describe("Search pattern (regex by default)"),
         path: z.string().describe("Directory or file to search"),
@@ -37,22 +38,24 @@ export function registerSearchTool(
             "Enable multiline matching (for function signatures, import blocks, etc.)",
           ),
         fileType: z
-          .string()
+          .union([z.string(), z.array(z.string())])
           .optional()
           .describe("Filter by file type (e.g. 'ts', 'py')"),
         fileTypeNot: z
-          .string()
+          .union([z.string(), z.array(z.string())])
           .optional()
           .describe("Exclude file type (e.g. 'json')"),
         glob: z
-          .string()
+          .union([z.string(), z.array(z.string())])
           .optional()
           .describe("Glob pattern to filter files (e.g. '*.test.ts')"),
         maxResults: z.number().optional().describe("Maximum matches per file"),
         contextLines: z
           .number()
           .optional()
-          .describe("Lines of context before and after each match"),
+          .describe(
+            "Lines of context before and after each match. When beforeContext or afterContext are also specified, they override the respective side.",
+          ),
         beforeContext: z
           .number()
           .optional()
@@ -80,7 +83,9 @@ export function registerSearchTool(
         additionalPatterns: z
           .array(z.string())
           .optional()
-          .describe("Additional patterns for OR matching"),
+          .describe(
+            "Additional patterns for OR matching. When fixedStrings is true, all patterns (including these) are treated as literal strings.",
+          ),
         jsonOutput: z
           .boolean()
           .optional()
@@ -112,8 +117,15 @@ export function registerSearchTool(
         validatePath(args.path, config.allowedDirs);
         const cmd = buildSearchCommand(args);
         const result = await executeRgCommand(cmd);
+        const { content, summary } = extractStats(result.stdout);
+        const cleanResult = { ...result, stdout: content };
         const limit = args.maxCharacters ?? config.defaultMaxCharacters;
-        return formatToolResult(result, "No matches found.", limit);
+        return formatToolResult(
+          cleanResult,
+          "No matches found.",
+          limit,
+          summary,
+        );
       } catch (error) {
         return {
           isError: true,

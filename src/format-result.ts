@@ -5,11 +5,18 @@ export function formatToolResult(
   result: RgResult,
   emptyMessage: string,
   maxCharacters?: number,
+  statsSummary?: string | null,
 ): { content: Array<{ type: "text"; text: string }> } {
   const body = result.stdout || emptyMessage;
   const { text, truncated, originalLength } = truncateText(body, maxCharacters);
 
-  const parts: string[] = [text];
+  const parts: string[] = [];
+
+  if (statsSummary) {
+    parts.push(`[${statsSummary}]\n\n`);
+  }
+
+  parts.push(text);
 
   if (truncated) {
     parts.push(

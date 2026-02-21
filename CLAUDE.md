@@ -30,7 +30,8 @@ src/
 ├── server.ts         # McpServer ファクトリ (ServerConfig, 6ツール登録)
 ├── path-guard.ts     # パス検証 (--allow-dir)
 ├── truncate.ts       # 結果の文字数制限
-├── format-result.ts  # ツール結果フォーマット (truncate + stderr 警告)
+├── stats.ts          # search の --stats 出力パース (サマリ抽出)
+├── format-result.ts  # ツール結果フォーマット (truncate + stderr 警告 + stats サマリ)
 ├── rg/
 │   ├── types.ts      # 型定義 (RgSearchOptions, RgCommand, RgResult 等)
 │   ├── builder.ts    # 純粋関数: オプション → { command, args[] }
@@ -55,7 +56,7 @@ src/
 ## テスト
 
 - `bun:test` を使用
-- 4層構成: ユーティリティ単体テスト (path-guard, truncate, format-result) → builder 単体テスト (rg 不要) → executor 統合テスト → MCP 統合テスト
+- 5層構成: ユーティリティ単体テスト (path-guard, truncate, format-result, stats) → builder 単体テスト (rg 不要) → executor 統合テスト → MCP 統合テスト
 - MCP 統合テストは `InMemoryTransport` + `Client` でプロトコルレベルの検証を行う
 - テストフィクスチャは `tests/fixtures/` に配置
 

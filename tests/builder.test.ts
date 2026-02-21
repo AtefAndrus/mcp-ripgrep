@@ -301,6 +301,56 @@ describe("buildSearchCommand", () => {
     expect(cmd.args[sepIdx + 2]).toBe("/tmp/日本語パス/テスト");
   });
 
+  test("includes --stats flag", () => {
+    const cmd = buildSearchCommand({ pattern: "x", path: "/tmp" });
+    expect(cmd.args).toContain("--stats");
+  });
+
+  test("fileType as array", () => {
+    const cmd = buildSearchCommand({
+      pattern: "x",
+      path: "/tmp",
+      fileType: ["ts", "js"],
+    });
+    const tIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-t") acc.push(i);
+      return acc;
+    }, []);
+    expect(tIndices.length).toBe(2);
+    expect(cmd.args[tIndices[0] + 1]).toBe("ts");
+    expect(cmd.args[tIndices[1] + 1]).toBe("js");
+  });
+
+  test("fileTypeNot as array", () => {
+    const cmd = buildSearchCommand({
+      pattern: "x",
+      path: "/tmp",
+      fileTypeNot: ["json", "md"],
+    });
+    const tIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-T") acc.push(i);
+      return acc;
+    }, []);
+    expect(tIndices.length).toBe(2);
+    expect(cmd.args[tIndices[0] + 1]).toBe("json");
+    expect(cmd.args[tIndices[1] + 1]).toBe("md");
+  });
+
+  test("glob as array", () => {
+    const cmd = buildSearchCommand({
+      pattern: "x",
+      path: "/tmp",
+      glob: ["*.ts", "*.js"],
+    });
+    const gIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-g") acc.push(i);
+      return acc;
+    }, []);
+    expect(gIndices.length).toBe(2);
+    expect(cmd.args[gIndices[0] + 1]).toBe("*.ts");
+    expect(cmd.args[gIndices[1] + 1]).toBe("*.js");
+  });
+
   test("Japanese additionalPatterns", () => {
     const cmd = buildSearchCommand({
       pattern: "東京",
@@ -362,6 +412,82 @@ describe("buildReplaceCommand", () => {
     });
     expect(cmd.args).toContain("-F");
   });
+
+  test("fileTypeNot", () => {
+    const cmd = buildReplaceCommand({
+      pattern: "foo",
+      replacement: "bar",
+      path: "/tmp",
+      fileTypeNot: "json",
+    });
+    const tIdx = cmd.args.indexOf("-T");
+    expect(tIdx).toBeGreaterThan(-1);
+    expect(cmd.args[tIdx + 1]).toBe("json");
+  });
+
+  test("followSymlinks", () => {
+    const cmd = buildReplaceCommand({
+      pattern: "foo",
+      replacement: "bar",
+      path: "/tmp",
+      followSymlinks: true,
+    });
+    expect(cmd.args).toContain("-L");
+  });
+
+  test("maxDepth", () => {
+    const cmd = buildReplaceCommand({
+      pattern: "foo",
+      replacement: "bar",
+      path: "/tmp",
+      maxDepth: 5,
+    });
+    const dIdx = cmd.args.indexOf("-d");
+    expect(dIdx).toBeGreaterThan(-1);
+    expect(cmd.args[dIdx + 1]).toBe("5");
+  });
+
+  test("noIgnore", () => {
+    const cmd = buildReplaceCommand({
+      pattern: "foo",
+      replacement: "bar",
+      path: "/tmp",
+      noIgnore: true,
+    });
+    expect(cmd.args).toContain("--no-ignore");
+  });
+
+  test("fileType as array", () => {
+    const cmd = buildReplaceCommand({
+      pattern: "foo",
+      replacement: "bar",
+      path: "/tmp",
+      fileType: ["ts", "js"],
+    });
+    const tIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-t") acc.push(i);
+      return acc;
+    }, []);
+    expect(tIndices.length).toBe(2);
+    expect(cmd.args[tIndices[0] + 1]).toBe("ts");
+    expect(cmd.args[tIndices[1] + 1]).toBe("js");
+  });
+
+  test("glob as array", () => {
+    const cmd = buildReplaceCommand({
+      pattern: "foo",
+      replacement: "bar",
+      path: "/tmp",
+      glob: ["*.ts", "!*.test.ts"],
+    });
+    const gIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-g") acc.push(i);
+      return acc;
+    }, []);
+    expect(gIndices.length).toBe(2);
+    expect(cmd.args[gIndices[0] + 1]).toBe("*.ts");
+    expect(cmd.args[gIndices[1] + 1]).toBe("!*.test.ts");
+  });
 });
 
 describe("buildCountCommand", () => {
@@ -394,6 +520,25 @@ describe("buildCountCommand", () => {
     const cmd = buildCountCommand({ pattern: "x", path: "/tmp" });
     expect(cmd.args).not.toContain("-n");
   });
+
+  test("fileType and glob as arrays", () => {
+    const cmd = buildCountCommand({
+      pattern: "x",
+      path: "/tmp",
+      fileType: ["ts", "js"],
+      glob: ["*.test.*", "!*.spec.*"],
+    });
+    const tIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-t") acc.push(i);
+      return acc;
+    }, []);
+    expect(tIndices.length).toBe(2);
+    const gIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-g") acc.push(i);
+      return acc;
+    }, []);
+    expect(gIndices.length).toBe(2);
+  });
 });
 
 describe("buildSearchFilesCommand", () => {
@@ -420,6 +565,31 @@ describe("buildSearchFilesCommand", () => {
       sortBy: "path",
     });
     expect(cmd.args).toContain("--sort=path");
+  });
+
+  test("fileType and fileTypeNot as arrays", () => {
+    const cmd = buildSearchFilesCommand({
+      pattern: "x",
+      path: "/tmp",
+      fileType: ["ts", "js"],
+      fileTypeNot: ["json"],
+      glob: ["src/**"],
+    });
+    const tIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-t") acc.push(i);
+      return acc;
+    }, []);
+    expect(tIndices.length).toBe(2);
+    const bigTIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-T") acc.push(i);
+      return acc;
+    }, []);
+    expect(bigTIndices.length).toBe(1);
+    const gIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-g") acc.push(i);
+      return acc;
+    }, []);
+    expect(gIndices.length).toBe(1);
   });
 });
 
@@ -453,6 +623,23 @@ describe("buildListFilesCommand", () => {
     expect(cmd.args).toContain("-d");
     expect(cmd.args).toContain("--no-ignore");
     expect(cmd.args).toContain("--sort=created");
+  });
+  test("fileType and glob as arrays", () => {
+    const cmd = buildListFilesCommand({
+      path: "/tmp",
+      fileType: ["ts", "js"],
+      glob: ["src/**", "!node_modules/**"],
+    });
+    const tIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-t") acc.push(i);
+      return acc;
+    }, []);
+    expect(tIndices.length).toBe(2);
+    const gIndices = cmd.args.reduce<number[]>((acc, arg, i) => {
+      if (arg === "-g") acc.push(i);
+      return acc;
+    }, []);
+    expect(gIndices.length).toBe(2);
   });
 });
 

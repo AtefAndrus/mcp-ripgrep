@@ -5,9 +5,9 @@ export interface RgSearchOptions {
   caseSensitive?: boolean;
   wordMatch?: boolean;
   multiline?: boolean;
-  fileType?: string;
-  fileTypeNot?: string;
-  glob?: string;
+  fileType?: string | string[];
+  fileTypeNot?: string | string[];
+  glob?: string | string[];
   maxResults?: number;
   contextLines?: number;
   beforeContext?: number;
@@ -30,11 +30,15 @@ export interface RgReplaceOptions {
   fixedStrings?: boolean;
   caseSensitive?: boolean;
   wordMatch?: boolean;
-  fileType?: string;
-  glob?: string;
+  fileType?: string | string[];
+  glob?: string | string[];
   maxResults?: number;
   includeHidden?: boolean;
   onlyMatching?: boolean;
+  fileTypeNot?: string | string[];
+  noIgnore?: boolean;
+  maxDepth?: number;
+  followSymlinks?: boolean;
 }
 
 export interface RgCountOptions {
@@ -44,9 +48,9 @@ export interface RgCountOptions {
   fixedStrings?: boolean;
   caseSensitive?: boolean;
   wordMatch?: boolean;
-  fileType?: string;
-  fileTypeNot?: string;
-  glob?: string;
+  fileType?: string | string[];
+  fileTypeNot?: string | string[];
+  glob?: string | string[];
   includeHidden?: boolean;
   includeZero?: boolean;
   noIgnore?: boolean;
@@ -59,9 +63,9 @@ export interface RgSearchFilesOptions {
   fixedStrings?: boolean;
   caseSensitive?: boolean;
   wordMatch?: boolean;
-  fileType?: string;
-  fileTypeNot?: string;
-  glob?: string;
+  fileType?: string | string[];
+  fileTypeNot?: string | string[];
+  glob?: string | string[];
   includeHidden?: boolean;
   followSymlinks?: boolean;
   maxDepth?: number;
@@ -71,9 +75,9 @@ export interface RgSearchFilesOptions {
 
 export interface RgListFilesOptions {
   path: string;
-  fileType?: string;
-  fileTypeNot?: string;
-  glob?: string;
+  fileType?: string | string[];
+  fileTypeNot?: string | string[];
+  glob?: string | string[];
   includeHidden?: boolean;
   followSymlinks?: boolean;
   maxDepth?: number;

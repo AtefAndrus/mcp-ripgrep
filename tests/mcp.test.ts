@@ -101,6 +101,44 @@ describe("MCP integration", () => {
     expect(getTextContent(result)).toContain("東京タワー");
   });
 
+  test("search result includes stats summary", async () => {
+    const result = await client.callTool({
+      name: "search",
+      arguments: { pattern: "hello", path: fixturesPath },
+    });
+    expect(result.isError).toBeFalsy();
+    const text = getTextContent(result);
+    expect(text).toMatch(/^\[.*matches?.*files? searched.*\]/);
+  });
+
+  test("search with fileType array", async () => {
+    const result = await client.callTool({
+      name: "search",
+      arguments: {
+        pattern: "hello",
+        path: fixturesPath,
+        fileType: ["ts", "txt"],
+      },
+    });
+    expect(result.isError).toBeFalsy();
+    const text = getTextContent(result);
+    expect(text).toContain("hello");
+  });
+
+  test("search with glob array", async () => {
+    const result = await client.callTool({
+      name: "search",
+      arguments: {
+        pattern: "hello",
+        path: fixturesPath,
+        glob: ["*.ts", "*.txt"],
+      },
+    });
+    expect(result.isError).toBeFalsy();
+    const text = getTextContent(result);
+    expect(text).toContain("hello");
+  });
+
   test("search-and-replace previews replacement", async () => {
     const result = await client.callTool({
       name: "search-and-replace",

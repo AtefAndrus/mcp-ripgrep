@@ -36,15 +36,34 @@ export function registerSearchReplaceTool(
           ),
         wordMatch: z.boolean().optional().describe("Only match whole words"),
         fileType: z
-          .string()
+          .union([z.string(), z.array(z.string())])
           .optional()
           .describe("Filter by file type (e.g. 'ts', 'py')"),
-        glob: z.string().optional().describe("Glob pattern to filter files"),
+        fileTypeNot: z
+          .union([z.string(), z.array(z.string())])
+          .optional()
+          .describe("Exclude file type (e.g. 'json')"),
+        glob: z
+          .union([z.string(), z.array(z.string())])
+          .optional()
+          .describe("Glob pattern to filter files"),
         maxResults: z.number().optional().describe("Maximum matches per file"),
         includeHidden: z
           .boolean()
           .optional()
           .describe("Include hidden files and directories"),
+        followSymlinks: z
+          .boolean()
+          .optional()
+          .describe("Follow symbolic links"),
+        maxDepth: z
+          .number()
+          .optional()
+          .describe("Maximum directory traversal depth"),
+        noIgnore: z
+          .boolean()
+          .optional()
+          .describe("Ignore .gitignore and other ignore files"),
         onlyMatching: z
           .boolean()
           .optional()

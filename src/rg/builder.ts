@@ -19,20 +19,23 @@ function appendCaseFlag(args: string[], caseSensitive?: boolean): void {
 
 function appendTypeFlags(
   args: string[],
-  fileType?: string,
-  fileTypeNot?: string,
+  fileType?: string | string[],
+  fileTypeNot?: string | string[],
 ): void {
   if (fileType) {
-    args.push("-t", fileType);
+    const types = Array.isArray(fileType) ? fileType : [fileType];
+    for (const t of types) args.push("-t", t);
   }
   if (fileTypeNot) {
-    args.push("-T", fileTypeNot);
+    const types = Array.isArray(fileTypeNot) ? fileTypeNot : [fileTypeNot];
+    for (const t of types) args.push("-T", t);
   }
 }
 
-function appendGlobFlag(args: string[], glob?: string): void {
+function appendGlobFlag(args: string[], glob?: string | string[]): void {
   if (glob) {
-    args.push("-g", glob);
+    const globs = Array.isArray(glob) ? glob : [glob];
+    for (const g of globs) args.push("-g", g);
   }
 }
 
@@ -67,7 +70,7 @@ function appendSortFlag(args: string[], sortBy?: string): void {
 }
 
 export function buildSearchCommand(opts: RgSearchOptions): RgCommand {
-  const args: string[] = ["-n", "--color", "never", "--no-heading"];
+  const args: string[] = ["-n", "--color", "never", "--no-heading", "--stats"];
 
   appendCaseFlag(args, opts.caseSensitive);
   if (opts.fixedStrings) args.push("-F");
@@ -110,10 +113,13 @@ export function buildReplaceCommand(opts: RgReplaceOptions): RgCommand {
   appendCaseFlag(args, opts.caseSensitive);
   if (opts.fixedStrings) args.push("-F");
   if (opts.wordMatch) args.push("-w");
-  appendTypeFlags(args, opts.fileType);
+  appendTypeFlags(args, opts.fileType, opts.fileTypeNot);
   appendGlobFlag(args, opts.glob);
   if (opts.maxResults !== undefined) args.push("-m", String(opts.maxResults));
   appendHiddenFlag(args, opts.includeHidden);
+  appendFollowFlag(args, opts.followSymlinks);
+  appendMaxDepthFlag(args, opts.maxDepth);
+  appendNoIgnoreFlag(args, opts.noIgnore);
   if (opts.onlyMatching) args.push("-o");
   args.push("-r", opts.replacement);
   args.push("--", opts.pattern, opts.path);

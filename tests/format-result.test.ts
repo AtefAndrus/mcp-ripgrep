@@ -99,4 +99,36 @@ describe("formatToolResult", () => {
     );
     expect(getText(result)).toBe(longOutput);
   });
+
+  test("prepends stats summary when provided", () => {
+    const result = formatToolResult(
+      makeResult("file.ts:1:hello"),
+      "No matches found.",
+      undefined,
+      "5 matches, 2 files contained matches, 3 files searched",
+    );
+    const text = getText(result);
+    expect(text).toStartWith(
+      "[5 matches, 2 files contained matches, 3 files searched]",
+    );
+    expect(text).toContain("file.ts:1:hello");
+  });
+
+  test("does not prepend summary when statsSummary is null", () => {
+    const result = formatToolResult(
+      makeResult("file.ts:1:hello"),
+      "No matches found.",
+      undefined,
+      null,
+    );
+    expect(getText(result)).toBe("file.ts:1:hello");
+  });
+
+  test("does not prepend summary when statsSummary is omitted", () => {
+    const result = formatToolResult(
+      makeResult("file.ts:1:hello"),
+      "No matches found.",
+    );
+    expect(getText(result)).toBe("file.ts:1:hello");
+  });
 });
