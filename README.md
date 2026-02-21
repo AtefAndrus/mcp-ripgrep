@@ -4,24 +4,24 @@
 [![CI](https://github.com/AtefAndrus/mcp-ripgrep/actions/workflows/ci.yml/badge.svg)](https://github.com/AtefAndrus/mcp-ripgrep/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[ripgrep](https://github.com/BurntSushi/ripgrep) の検索機能を提供する MCP サーバー。
+An MCP server that provides [ripgrep](https://github.com/BurntSushi/ripgrep) search capabilities.
 
-## 前提条件
+## Prerequisites
 
-- [ripgrep](https://github.com/BurntSushi/ripgrep) (`rg`) がインストール済みで PATH に含まれていること
-- Node.js 22+ または Bun 1.3+
+- [ripgrep](https://github.com/BurntSushi/ripgrep) (`rg`) installed and available on PATH
+- Node.js 22+ or Bun 1.3+
 
-## インストール
+## Installation
 
 ```bash
 npm install @atef_andrus/mcp-ripgrep
 ```
 
-## 使い方
+## Usage
 
-### MCP サーバーとして利用
+### Use as an MCP Server
 
-MCP クライアントの設定に以下を追加する:
+Add the following to your MCP client configuration:
 
 ```json
 {
@@ -34,15 +34,15 @@ MCP クライアントの設定に以下を追加する:
 }
 ```
 
-### 起動オプション
+### Startup Options
 
-| オプション | 説明 |
+| Option | Description |
 |---|---|
-| `--allow-dir <path>` | 検索対象を指定ディレクトリ配下に制限 (複数指定可) |
-| `--max-result-chars <number>` | 結果の最大文字数。超過時は行境界で切り詰める (デフォルト: 50,000) |
-| `--max-output-bytes <number>` | ripgrep 出力の最大バイト数。超過時はプロセスを停止し結果を切り詰める (デフォルト: 20 MB) |
+| `--allow-dir <path>` | Restrict search scope to the specified directory (can be specified multiple times) |
+| `--max-result-chars <number>` | Maximum characters in results. Truncates at line boundaries when exceeded (default: 50,000) |
+| `--max-output-bytes <number>` | Maximum bytes of ripgrep output. Terminates the process and truncates results when exceeded (default: 20 MB) |
 
-起動オプション付きの設定例:
+Configuration example with startup options:
 
 ```json
 {
@@ -60,41 +60,41 @@ MCP クライアントの設定に以下を追加する:
 }
 ```
 
-### ツール一覧
+### Tools
 
-| ツール | 説明 |
+| Tool | Description |
 |---|---|
-| `search` | 正規表現・リテラル文字列・複数行マッチ・OR マッチ・コンテキスト行・各種フィルタに対応したパターン検索。結果先頭にマッチ件数・ファイル数のサマリを付与 |
-| `search-and-replace` | 検索置換のプレビュー (読み取り専用)。複数行マッチ・キャプチャグループ ($1, ${name}) に対応 |
-| `search-count` | ファイルごとのマッチ数カウント (行数またはマッチ総数)。結果のソートに対応 |
-| `search-files` | パターンにマッチする/しないファイルの一覧 |
-| `list-files` | 検索スコープ内の全ファイル一覧 |
-| `list-file-types` | ripgrep がサポートするファイルタイプの一覧 |
+| `search` | Pattern search with regex, literal strings, multiline matching, OR matching, context lines, and various filters. Prepends a summary of match count and file count to results |
+| `search-and-replace` | Search-and-replace preview (read-only). Supports multiline matching and capture groups ($1, ${name}) |
+| `search-count` | Count matches per file (by line count or total matches). Supports sorting results |
+| `search-files` | List files that match or do not match a pattern |
+| `list-files` | List all files within the search scope |
+| `list-file-types` | List file types supported by ripgrep |
 
-### 主要パラメータ
+### Key Parameters
 
-| パラメータ | 説明 |
+| Parameter | Description |
 |---|---|
-| `pattern` | 検索パターン (デフォルトは正規表現) |
-| `path` | 検索対象のディレクトリまたはファイル |
-| `fixedStrings` | パターンをリテラル文字列として扱う |
-| `caseSensitive` | `true` = 大小区別、`false` = 大小無視、省略 = smart-case |
-| `fileType` | ファイルタイプでフィルタ (例: `"ts"`, `["ts", "js"]`)。文字列または配列 |
-| `fileTypeNot` | 除外するファイルタイプ (例: `"json"`, `["json", "md"]`)。文字列または配列 |
-| `glob` | glob パターンでフィルタ (例: `"*.test.ts"`, `["src/**", "!vendor/**"]`)。文字列または配列 |
-| `includeHidden` | 隠しファイルを含める |
-| `followSymlinks` | シンボリックリンクを追跡する |
-| `maxDepth` | ディレクトリ探索の最大深度 |
-| `noIgnore` | .gitignore のルールを無視し、通常は除外されるファイルも検索する |
-| `multiline` | 複数行マッチを有効にする (関数シグネチャ、import ブロック等) |
-| `additionalPatterns` | OR マッチ用の追加パターン (配列) |
-| `sortBy` | 結果のソート。search / search-files / list-files は `"path"` `"modified"` `"created"`、search-count は `"path"` `"count"` `"count-asc"` |
-| `maxCharacters` | 結果の最大文字数。超過時は行境界で切り詰め、サマリを付与 |
+| `pattern` | Search pattern (regex by default) |
+| `path` | Directory or file to search |
+| `fixedStrings` | Treat the pattern as a literal string |
+| `caseSensitive` | `true` = case-sensitive, `false` = case-insensitive, omitted = smart-case |
+| `fileType` | Filter by file type (e.g., `"ts"`, `["ts", "js"]`). String or array |
+| `fileTypeNot` | Exclude file types (e.g., `"json"`, `["json", "md"]`). String or array |
+| `glob` | Filter by glob pattern (e.g., `"*.test.ts"`, `["src/**", "!vendor/**"]`). String or array |
+| `includeHidden` | Include hidden files |
+| `followSymlinks` | Follow symbolic links |
+| `maxDepth` | Maximum directory traversal depth |
+| `noIgnore` | Ignore .gitignore rules and search files that are normally excluded |
+| `multiline` | Enable multiline matching (function signatures, import blocks, etc.) |
+| `additionalPatterns` | Additional patterns for OR matching (array) |
+| `sortBy` | Sort results. search / search-files / list-files: `"path"` `"modified"` `"created"`. search-count: `"path"` `"count"` `"count-asc"` |
+| `maxCharacters` | Maximum characters in results. Truncates at line boundaries and appends a summary when exceeded |
 
-### ツール別パラメータ対応
+### Parameter Support by Tool
 
 <!-- params-table-start -->
-| パラメータ | `list-file-types` | `list-files` | `search` | `search-and-replace` | `search-count` | `search-files` |
+| Parameter | `list-file-types` | `list-files` | `search` | `search-and-replace` | `search-count` | `search-files` |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | `pattern` | - | - | o | o | o | o |
 | `path` | - | o | o | o | o | o |
@@ -125,34 +125,34 @@ MCP クライアントの設定に以下を追加する:
 | `includeZero` | - | - | - | - | o | - |
 <!-- params-table-end -->
 
-## 開発
+## Development
 
 ```bash
-# 依存関係のインストール
+# Install dependencies
 bun install
 
-# テスト実行
+# Run tests
 bun test
 
-# 型チェック
+# Type check
 bunx tsc --noEmit
 
-# Lint とフォーマット
+# Lint and format
 bunx biome check --write .
 
-# ビルド
+# Build
 bunx tsc
 
-# 開発モードで起動
+# Start in development mode
 bun run dev
 ```
 
-## セキュリティ
+## Security
 
-- このサーバーは `spawn("rg", args)` で引数を配列として渡す (シェル補間なし)。パターンとパスは `--` セパレータの後に配置し、フラグインジェクションを防止する。
-- `--allow-dir` オプションで検索対象ディレクトリを制限できる。パスは `path.resolve()` で絶対パス化した後にプレフィックス一致で検証する。
-- **制限事項**: `followSymlinks` 有効時、シンボリックリンク経由で許可外ディレクトリにアクセスできる可能性がある。`--allow-dir` と `followSymlinks` を併用する場合はこの点に留意すること。
+- This server passes arguments as an array via `spawn("rg", args)` (no shell interpolation). Patterns and paths are placed after a `--` separator to prevent flag injection.
+- The `--allow-dir` option restricts the search scope to specified directories. Paths are resolved to absolute paths using `path.resolve()` and validated via prefix matching.
+- **Limitation**: When `followSymlinks` is enabled, symbolic links may allow access to directories outside the allowed scope. Be aware of this when using `--allow-dir` together with `followSymlinks`.
 
-## ライセンス
+## License
 
 MIT

@@ -41,7 +41,7 @@ function generateTable(
 
   const paramNames = [...paramSet.keys()];
 
-  const header = `| パラメータ | ${toolNames.map((n) => `\`${n}\``).join(" | ")} |`;
+  const header = `| Parameter | ${toolNames.map((n) => `\`${n}\``).join(" | ")} |`;
   const separator = `|---|${toolNames.map(() => ":---:").join("|")}|`;
 
   const rows = paramNames.map((param) => {
