@@ -39,7 +39,7 @@ MCP クライアントの設定に以下を追加する:
 | オプション | 説明 |
 |---|---|
 | `--allow-dir <path>` | 検索対象を指定ディレクトリ配下に制限 (複数指定可) |
-| `--max-result-chars <number>` | 結果の最大文字数。超過時は行境界で切り詰める (デフォルト: 制限なし) |
+| `--max-result-chars <number>` | 結果の最大文字数。超過時は行境界で切り詰める (デフォルト: 50,000) |
 | `--max-output-bytes <number>` | ripgrep 出力の最大バイト数。超過時はプロセスを停止し結果を切り詰める (デフォルト: 20 MB) |
 
 起動オプション付きの設定例:
@@ -85,7 +85,7 @@ MCP クライアントの設定に以下を追加する:
 | `includeHidden` | 隠しファイルを含める |
 | `followSymlinks` | シンボリックリンクを追跡する |
 | `maxDepth` | ディレクトリ探索の最大深度 |
-| `noIgnore` | .gitignore 等の無視ファイルを無視する |
+| `noIgnore` | .gitignore のルールを無視し、通常は除外されるファイルも検索する |
 | `multiline` | 複数行マッチを有効にする (関数シグネチャ、import ブロック等) |
 | `additionalPatterns` | OR マッチ用の追加パターン (配列) |
 | `sortBy` | 結果のソート。search / search-files / list-files は `"path"` `"modified"` `"created"`、search-count は `"path"` `"count"` `"count-asc"` |

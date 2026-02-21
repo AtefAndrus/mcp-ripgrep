@@ -45,7 +45,9 @@ export function registerListFilesTool(
         noIgnore: z
           .boolean()
           .optional()
-          .describe("Ignore .gitignore and other ignore files"),
+          .describe(
+            "Do NOT respect .gitignore rules (search files that are normally ignored)",
+          ),
         sortBy: z
           .enum(["path", "modified", "created"])
           .optional()

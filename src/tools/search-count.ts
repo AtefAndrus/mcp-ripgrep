@@ -83,7 +83,9 @@ export function registerSearchCountTool(
         noIgnore: z
           .boolean()
           .optional()
-          .describe("Ignore .gitignore and other ignore files"),
+          .describe(
+            "Do NOT respect .gitignore rules (search files that are normally ignored)",
+          ),
         sortBy: z
           .enum(["path", "count", "count-asc"])
           .optional()
@@ -106,11 +108,16 @@ export function registerSearchCountTool(
           maxOutputBytes: config.maxOutputBytes,
         };
         const result = await executeRgCommand(cmd, execOpts);
-        if (args.sortBy && result.stdout) {
-          result.stdout = sortCountOutput(result.stdout, args.sortBy);
-        }
+        const stdout =
+          args.sortBy && result.stdout
+            ? sortCountOutput(result.stdout, args.sortBy)
+            : result.stdout;
         const limit = args.maxCharacters ?? config.defaultMaxCharacters;
-        return formatToolResult(result, "No matches found.", limit);
+        return formatToolResult(
+          { ...result, stdout },
+          "No matches found.",
+          limit,
+        );
       } catch (error) {
         return {
           isError: true,

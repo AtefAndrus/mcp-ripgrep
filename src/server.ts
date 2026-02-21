@@ -22,7 +22,10 @@ export function createServer(config?: ServerConfig): McpServer {
     version,
   });
 
-  const cfg = config ?? {};
+  const cfg: ServerConfig = {
+    ...config,
+    defaultMaxCharacters: config?.defaultMaxCharacters ?? 50_000,
+  };
 
   registerSearchTool(server, cfg);
   registerSearchReplaceTool(server, cfg);

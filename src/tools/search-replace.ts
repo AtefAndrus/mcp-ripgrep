@@ -69,7 +69,9 @@ export function registerSearchReplaceTool(
         noIgnore: z
           .boolean()
           .optional()
-          .describe("Ignore .gitignore and other ignore files"),
+          .describe(
+            "Do NOT respect .gitignore rules (search files that are normally ignored)",
+          ),
         onlyMatching: z
           .boolean()
           .optional()

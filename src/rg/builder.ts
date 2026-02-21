@@ -79,12 +79,16 @@ export function buildSearchCommand(opts: RgSearchOptions): RgCommand {
   appendTypeFlags(args, opts.fileType, opts.fileTypeNot);
   appendGlobFlag(args, opts.glob);
   if (opts.maxResults !== undefined) args.push("-m", String(opts.maxResults));
-  if (opts.contextLines !== undefined)
-    args.push("-C", String(opts.contextLines));
-  if (opts.beforeContext !== undefined)
-    args.push("-B", String(opts.beforeContext));
-  if (opts.afterContext !== undefined)
-    args.push("-A", String(opts.afterContext));
+  if (opts.contextLines !== undefined) {
+    const before = opts.beforeContext ?? opts.contextLines;
+    const after = opts.afterContext ?? opts.contextLines;
+    args.push("-B", String(before), "-A", String(after));
+  } else {
+    if (opts.beforeContext !== undefined)
+      args.push("-B", String(opts.beforeContext));
+    if (opts.afterContext !== undefined)
+      args.push("-A", String(opts.afterContext));
+  }
   if (opts.invertMatch) args.push("-v");
   appendHiddenFlag(args, opts.includeHidden);
   appendFollowFlag(args, opts.followSymlinks);

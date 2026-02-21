@@ -126,9 +126,42 @@ describe("buildSearchCommand", () => {
       path: "/tmp",
       contextLines: 3,
     });
-    const cIdx = cmd.args.indexOf("-C");
-    expect(cIdx).toBeGreaterThan(-1);
-    expect(cmd.args[cIdx + 1]).toBe("3");
+    const bIdx = cmd.args.indexOf("-B");
+    expect(bIdx).toBeGreaterThan(-1);
+    expect(cmd.args[bIdx + 1]).toBe("3");
+    const aIdx = cmd.args.indexOf("-A");
+    expect(aIdx).toBeGreaterThan(-1);
+    expect(cmd.args[aIdx + 1]).toBe("3");
+  });
+
+  test("contextLines with beforeContext override", () => {
+    const cmd = buildSearchCommand({
+      pattern: "x",
+      path: "/tmp",
+      contextLines: 3,
+      beforeContext: 5,
+    });
+    const bIdx = cmd.args.indexOf("-B");
+    expect(bIdx).toBeGreaterThan(-1);
+    expect(cmd.args[bIdx + 1]).toBe("5");
+    const aIdx = cmd.args.indexOf("-A");
+    expect(aIdx).toBeGreaterThan(-1);
+    expect(cmd.args[aIdx + 1]).toBe("3");
+  });
+
+  test("contextLines with afterContext override", () => {
+    const cmd = buildSearchCommand({
+      pattern: "x",
+      path: "/tmp",
+      contextLines: 3,
+      afterContext: 7,
+    });
+    const bIdx = cmd.args.indexOf("-B");
+    expect(bIdx).toBeGreaterThan(-1);
+    expect(cmd.args[bIdx + 1]).toBe("3");
+    const aIdx = cmd.args.indexOf("-A");
+    expect(aIdx).toBeGreaterThan(-1);
+    expect(cmd.args[aIdx + 1]).toBe("7");
   });
 
   test("beforeContext", () => {
