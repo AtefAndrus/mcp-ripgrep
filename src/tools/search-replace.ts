@@ -1,15 +1,21 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { formatToolResult } from "../format-result.js";
+import { validatePath } from "../path-guard.js";
 import { buildReplaceCommand } from "../rg/builder.js";
 import { executeRgCommand } from "../rg/executor.js";
+import type { ServerConfig } from "../server.js";
 
-export function registerSearchReplaceTool(server: McpServer): void {
+export function registerSearchReplaceTool(
+  server: McpServer,
+  config: ServerConfig,
+): void {
   server.registerTool(
     "search-and-replace",
     {
       title: "Ripgrep Search and Replace Preview",
       description:
-        "Preview search-and-replace results using ripgrep. Does NOT modify files. Useful for previewing replacements and testing capture groups ($1, $2, ${name}).",
+        "Read-only preview of search-and-replace results using ripgrep. Does NOT modify files. Useful for previewing replacements and testing capture groups ($1, $2, ${name}).",
       inputSchema: {
         pattern: z.string().describe("Search pattern (regex by default)"),
         replacement: z
@@ -43,17 +49,21 @@ export function registerSearchReplaceTool(server: McpServer): void {
           .boolean()
           .optional()
           .describe("Show only the replaced text instead of the full line"),
+        maxCharacters: z
+          .number()
+          .optional()
+          .describe(
+            "Maximum characters in the result. Truncated with summary if exceeded.",
+          ),
       },
     },
     async (args) => {
       try {
+        validatePath(args.path, config.allowedDirs);
         const cmd = buildReplaceCommand(args);
         const result = await executeRgCommand(cmd);
-        return {
-          content: [
-            { type: "text", text: result.stdout || "No matches found." },
-          ],
-        };
+        const limit = args.maxCharacters ?? config.defaultMaxCharacters;
+        return formatToolResult(result, "No matches found.", limit);
       } catch (error) {
         return {
           isError: true,

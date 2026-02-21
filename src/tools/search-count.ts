@@ -1,9 +1,15 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { formatToolResult } from "../format-result.js";
+import { validatePath } from "../path-guard.js";
 import { buildCountCommand } from "../rg/builder.js";
 import { executeRgCommand } from "../rg/executor.js";
+import type { ServerConfig } from "../server.js";
 
-export function registerSearchCountTool(server: McpServer): void {
+export function registerSearchCountTool(
+  server: McpServer,
+  config: ServerConfig,
+): void {
   server.registerTool(
     "search-count",
     {
@@ -48,17 +54,21 @@ export function registerSearchCountTool(server: McpServer): void {
           .boolean()
           .optional()
           .describe("Ignore .gitignore and other ignore files"),
+        maxCharacters: z
+          .number()
+          .optional()
+          .describe(
+            "Maximum characters in the result. Truncated with summary if exceeded.",
+          ),
       },
     },
     async (args) => {
       try {
+        validatePath(args.path, config.allowedDirs);
         const cmd = buildCountCommand(args);
         const result = await executeRgCommand(cmd);
-        return {
-          content: [
-            { type: "text", text: result.stdout || "No matches found." },
-          ],
-        };
+        const limit = args.maxCharacters ?? config.defaultMaxCharacters;
+        return formatToolResult(result, "No matches found.", limit);
       } catch (error) {
         return {
           isError: true,

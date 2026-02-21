@@ -1,9 +1,15 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { formatToolResult } from "../format-result.js";
+import { validatePath } from "../path-guard.js";
 import { buildSearchFilesCommand } from "../rg/builder.js";
 import { executeRgCommand } from "../rg/executor.js";
+import type { ServerConfig } from "../server.js";
 
-export function registerSearchFilesTool(server: McpServer): void {
+export function registerSearchFilesTool(
+  server: McpServer,
+  config: ServerConfig,
+): void {
   server.registerTool(
     "search-files",
     {
@@ -54,17 +60,21 @@ export function registerSearchFilesTool(server: McpServer): void {
           .enum(["path", "modified", "created"])
           .optional()
           .describe("Sort results by field"),
+        maxCharacters: z
+          .number()
+          .optional()
+          .describe(
+            "Maximum characters in the result. Truncated with summary if exceeded.",
+          ),
       },
     },
     async (args) => {
       try {
+        validatePath(args.path, config.allowedDirs);
         const cmd = buildSearchFilesCommand(args);
         const result = await executeRgCommand(cmd);
-        return {
-          content: [
-            { type: "text", text: result.stdout || "No matching files found." },
-          ],
-        };
+        const limit = args.maxCharacters ?? config.defaultMaxCharacters;
+        return formatToolResult(result, "No matching files found.", limit);
       } catch (error) {
         return {
           isError: true,
