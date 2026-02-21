@@ -55,6 +55,8 @@ export interface RgCountOptions {
   includeHidden?: boolean;
   includeZero?: boolean;
   noIgnore?: boolean;
+  maxDepth?: number;
+  followSymlinks?: boolean;
 }
 
 export interface RgSearchFilesOptions {

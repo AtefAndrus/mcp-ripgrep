@@ -593,6 +593,26 @@ describe("buildCountCommand", () => {
     }, []);
     expect(gIndices.length).toBe(2);
   });
+
+  test("maxDepth adds -d flag", () => {
+    const cmd = buildCountCommand({
+      pattern: "x",
+      path: "/tmp",
+      maxDepth: 2,
+    });
+    const idx = cmd.args.indexOf("-d");
+    expect(idx).not.toBe(-1);
+    expect(cmd.args[idx + 1]).toBe("2");
+  });
+
+  test("followSymlinks adds -L flag", () => {
+    const cmd = buildCountCommand({
+      pattern: "x",
+      path: "/tmp",
+      followSymlinks: true,
+    });
+    expect(cmd.args).toContain("-L");
+  });
 });
 
 describe("buildSearchFilesCommand", () => {

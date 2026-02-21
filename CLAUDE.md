@@ -13,6 +13,7 @@ bunx tsc --noEmit    # 型チェック
 bunx biome check .   # Lint
 bunx biome check --write .  # Lint + フォーマット自動修正
 bunx tsc             # ビルド (dist/ に出力)
+bun run scripts/generate-param-table.ts --write  # README パラメータ対応表を再生成 (ツールのパラメータ追加・削除時に実行)
 ```
 
 ## コード規約
@@ -43,6 +44,9 @@ src/
     ├── search-files.ts
     ├── list-files.ts
     └── list-file-types.ts
+
+scripts/
+└── generate-param-table.ts  # README のツール別パラメータ対応表を自動生成
 
 .github/workflows/
 ├── ci.yml            # CI: push/PR で lint・型チェック・テスト実行

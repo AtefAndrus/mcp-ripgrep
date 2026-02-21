@@ -91,6 +91,40 @@ MCP クライアントの設定に以下を追加する:
 | `sortBy` | 結果のソート。search / search-files / list-files は `"path"` `"modified"` `"created"`、search-count は `"path"` `"count"` `"count-asc"` |
 | `maxCharacters` | 結果の最大文字数。超過時は行境界で切り詰め、サマリを付与 |
 
+### ツール別パラメータ対応
+
+<!-- params-table-start -->
+| パラメータ | `list-file-types` | `list-files` | `search` | `search-and-replace` | `search-count` | `search-files` |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| `pattern` | - | - | o | o | o | o |
+| `path` | - | o | o | o | o | o |
+| `fixedStrings` | - | - | o | o | o | o |
+| `caseSensitive` | - | - | o | o | o | o |
+| `wordMatch` | - | - | o | o | o | o |
+| `multiline` | - | - | o | o | - | - |
+| `fileType` | - | o | o | o | o | o |
+| `fileTypeNot` | - | o | o | o | o | o |
+| `glob` | - | o | o | o | o | o |
+| `maxResults` | - | - | o | o | - | - |
+| `contextLines` | - | - | o | - | - | - |
+| `beforeContext` | - | - | o | - | - | - |
+| `afterContext` | - | - | o | - | - | - |
+| `invertMatch` | - | - | o | - | - | o |
+| `includeHidden` | - | o | o | o | o | o |
+| `followSymlinks` | - | o | o | o | o | o |
+| `maxDepth` | - | o | o | o | o | o |
+| `additionalPatterns` | - | - | o | - | - | - |
+| `jsonOutput` | - | - | o | - | - | - |
+| `maxColumns` | - | - | o | - | - | - |
+| `noIgnore` | - | o | o | o | o | o |
+| `sortBy` | - | o | o | - | o | o |
+| `maxCharacters` | o | o | o | o | o | o |
+| `replacement` | - | - | - | o | - | - |
+| `onlyMatching` | - | - | - | o | - | - |
+| `countMode` | - | - | - | - | o | - |
+| `includeZero` | - | - | - | - | o | - |
+<!-- params-table-end -->
+
 ## 開発
 
 ```bash

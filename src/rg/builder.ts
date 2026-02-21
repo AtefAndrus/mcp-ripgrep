@@ -149,6 +149,8 @@ export function buildCountCommand(opts: RgCountOptions): RgCommand {
   appendHiddenFlag(args, opts.includeHidden);
   if (opts.includeZero) args.push("--include-zero");
   appendNoIgnoreFlag(args, opts.noIgnore);
+  appendFollowFlag(args, opts.followSymlinks);
+  appendMaxDepthFlag(args, opts.maxDepth);
   args.push("--", opts.pattern, opts.path);
 
   return { command: "rg", args };

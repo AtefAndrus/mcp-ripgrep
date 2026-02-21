@@ -86,6 +86,14 @@ export function registerSearchCountTool(
           .describe(
             "Do NOT respect .gitignore rules (search files that are normally ignored)",
           ),
+        followSymlinks: z
+          .boolean()
+          .optional()
+          .describe("Follow symbolic links"),
+        maxDepth: z
+          .number()
+          .optional()
+          .describe("Maximum directory traversal depth"),
         sortBy: z
           .enum(["path", "count", "count-asc"])
           .optional()
