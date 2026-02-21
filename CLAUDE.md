@@ -26,8 +26,11 @@ bunx tsc             # ビルド (dist/ に出力)
 
 ```
 src/
-├── index.ts          # エントリポイント (shebang + stdio transport)
-├── server.ts         # McpServer ファクトリ (6ツール登録)
+├── index.ts          # エントリポイント (CLI引数パース + stdio transport)
+├── server.ts         # McpServer ファクトリ (ServerConfig, 6ツール登録)
+├── path-guard.ts     # パス検証 (--allow-dir)
+├── truncate.ts       # 結果の文字数制限
+├── format-result.ts  # ツール結果フォーマット (truncate + stderr 警告)
 ├── rg/
 │   ├── types.ts      # 型定義 (RgSearchOptions, RgCommand, RgResult 等)
 │   ├── builder.ts    # 純粋関数: オプション → { command, args[] }
@@ -42,7 +45,7 @@ src/
 
 .github/workflows/
 ├── ci.yml            # CI: push/PR で lint・型チェック・テスト実行
-└── publish.yml       # npm 公開: v* タグ push で自動 publish
+└── publish.yml       # npm 公開: v* タグ push で自動 publish (lint・テスト付き)
 ```
 
 - `builder.ts` はシェルを介さず `spawn("rg", args)` 用の引数配列を構築する
@@ -52,7 +55,7 @@ src/
 ## テスト
 
 - `bun:test` を使用
-- 3層構成: builder 単体テスト (rg 不要) → executor 統合テスト → MCP 統合テスト
+- 4層構成: ユーティリティ単体テスト (path-guard, truncate, format-result) → builder 単体テスト (rg 不要) → executor 統合テスト → MCP 統合テスト
 - MCP 統合テストは `InMemoryTransport` + `Client` でプロトコルレベルの検証を行う
 - テストフィクスチャは `tests/fixtures/` に配置
 
@@ -76,3 +79,4 @@ git push origin vX.Y.Z
 - `shell: true` は絶対に使わない
 - 文字列結合でコマンドを組み立てない
 - ユーザー入力は必ず配列の個別要素として `spawn` に渡す
+- `--allow-dir` でパス制限時、`path.resolve()` + プレフィックス一致で検証。symlink は未解決 (`fs.realpathSync` 未使用)
