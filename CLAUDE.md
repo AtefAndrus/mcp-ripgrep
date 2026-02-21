@@ -13,76 +13,34 @@ bunx tsc --noEmit    # 型チェック
 bunx biome check .   # Lint
 bunx biome check --write .  # Lint + フォーマット自動修正
 bunx tsc             # ビルド (dist/ に出力)
-bun run scripts/generate-param-table.ts --write  # README パラメータ対応表を再生成 (ツールのパラメータ追加・削除時に実行)
+bun run scripts/generate-param-table.ts --write  # README パラメータ対応表を再生成
 ```
-
-## コード規約
-
-- ES Modules (`import`/`export`) を使用。CommonJS は不可
-- インデント: スペース2個 (Biome で強制)
-- フォーマッター/リンター: Biome (`recommended` ルール)
-- 型チェック: TypeScript strict mode
 
 ## アーキテクチャ
 
-```
-src/
-├── index.ts          # エントリポイント (CLI引数パース + stdio transport)
-├── server.ts         # McpServer ファクトリ (ServerConfig, 6ツール登録)
-├── path-guard.ts     # パス検証 (--allow-dir)
-├── truncate.ts       # 結果の文字数制限
-├── stats.ts          # search の --stats 出力パース (サマリ抽出)
-├── format-result.ts  # ツール結果フォーマット (truncate + stderr 警告 + stats サマリ + executor truncation 警告)
-├── rg/
-│   ├── types.ts      # 型定義 (RgSearchOptions, RgCommand, RgResult 等)
-│   ├── builder.ts    # 純粋関数: オプション → { command, args[] }
-│   └── executor.ts   # spawn 実行、exit code ハンドリング、出力バイト数制限
-└── tools/            # 各ツールの registerTool 定義
-    ├── search.ts
-    ├── search-replace.ts
-    ├── search-count.ts
-    ├── search-files.ts
-    ├── list-files.ts
-    └── list-file-types.ts
-
-scripts/
-└── generate-param-table.ts  # README のツール別パラメータ対応表を自動生成
-
-.github/workflows/
-├── ci.yml            # CI: push/PR で lint・型チェック・テスト実行
-└── publish.yml       # npm 公開: v* タグ push で自動 publish (lint・テスト付き)
-```
-
-- `builder.ts` はシェルを介さず `spawn("rg", args)` 用の引数配列を構築する
-- パターンとパスは `--` セパレータの後に配置し、フラグインジェクションを防止する
-- `caseSensitive` 省略時は `-S` (smart-case) がデフォルト
-- `executor.ts` は stdout のバイト数を追跡し、`maxOutputBytes` (デフォルト 20 MB) 超過時に SIGTERM でプロセスを停止する
+- ツール定義は `src/tools/` に 1 ファイル 1 ツールで配置。新ツール追加時は既存ツール (例: `src/tools/search.ts`) をテンプレートとして使い、`src/server.ts` に register 呼び出しを追加する
+- コマンド構築 (`src/rg/builder.ts`) と実行 (`src/rg/executor.ts`) は分離されている。builder は純粋関数で `{ command, args[] }` を返すだけなので、rg バイナリなしで単体テスト可能
+- builder はシェルを介さず `spawn("rg", args)` 用の引数配列を構築する。この設計はセキュリティ上の要件 (後述) による
 
 ## テスト
 
-- `bun:test` を使用
-- 5層構成: ユーティリティ単体テスト (path-guard, truncate, format-result, stats) → builder 単体テスト (rg 不要) → executor 統合テスト → MCP 統合テスト
-- MCP 統合テストは `InMemoryTransport` + `Client` でプロトコルレベルの検証を行う
+- `bun:test` を使用。テストファイルは `tests/` 直下に配置
+- builder テスト (`tests/builder.test.ts`) は rg バイナリ不要。executor テスト以降は rg が必要
+- MCP 統合テスト (`tests/mcp.test.ts`) は `InMemoryTransport` + `Client` でプロトコルレベル検証。新ツール追加時はここにテストケースを追加する
 - テストフィクスチャは `tests/fixtures/` に配置
 
-## CI/CD
+## 注意事項
 
-- **CI** (`ci.yml`): main への push/PR で lint (`biome check`)・型チェック (`tsc --noEmit`)・テスト (`bun test`) を実行
-- **Publish** (`publish.yml`): `v*` タグ push で `npm publish --provenance` を自動実行
-- CI ランナーには `apt-get install -y ripgrep` で rg をインストール (テストが実バイナリを使用するため)
-
-## リリース手順
-
-```bash
-git tag vX.Y.Z
-git push origin vX.Y.Z
-```
-
-タグ push で publish ワークフローが起動し、npm に自動公開される。
+- ツールのパラメータを追加・削除・変更したら `bun run scripts/generate-param-table.ts --write` を実行して README の対応表を更新する。CI では検証されないため忘れやすい
+- `caseSensitive` は `true`/`false`/`undefined` の三値で挙動が変わる (`builder.ts:10-17`)。`if (caseSensitive)` のような二値判定をすると `undefined` (smart-case) のパスが壊れる
+- `executor.ts` の exit code 判定: rg は「マッチなし」を exit code 1 で返す。code 0-1 は正常、2 以上がエラー
+- `path-guard.ts` は `path.resolve()` + プレフィックス一致で検証する。`fs.realpathSync` は意図的に使っていない (symlink は未解決)
+- リリースは `git tag vX.Y.Z && git push origin vX.Y.Z` で自動公開。publish ワークフローが npm に `--provenance` 付きで publish する
 
 ## セキュリティ
 
-- `shell: true` は絶対に使わない
-- 文字列結合でコマンドを組み立てない
-- ユーザー入力は必ず配列の個別要素として `spawn` に渡す
-- `--allow-dir` でパス制限時、`path.resolve()` + プレフィックス一致で検証。symlink は未解決 (`fs.realpathSync` 未使用)
+このサーバーは MCP 経由でユーザー入力 (検索パターン、パス) をそのまま rg プロセスに渡す。シェルインジェクション防止が最重要。
+
+- `shell: true` は絶対に使わない。`spawn` の第2引数に配列で引数を渡す
+- 文字列結合やテンプレートリテラルでコマンド文字列を組み立てない
+- パターンとパスは `--` セパレータの後に配置する (フラグインジェクション防止)
