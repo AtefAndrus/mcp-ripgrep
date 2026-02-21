@@ -82,4 +82,27 @@ describe("executeRgCommand", () => {
     expect(result.exitCode).toBe(0);
     expect(result.stdout.length).toBeGreaterThan(0);
   });
+
+  test("truncates output when maxOutputBytes is exceeded", async () => {
+    const cmd: RgCommand = {
+      command: "rg",
+      args: ["--color", "never", "--no-heading", "-e", ".", "--", fixturesPath],
+    };
+    const result = await executeRgCommand(cmd, { maxOutputBytes: 10 });
+    expect(result.truncatedByExecutor).toBe(true);
+    expect(result.exitCode).toBe(0);
+  });
+
+  test("does not truncate when output is within maxOutputBytes", async () => {
+    const cmd: RgCommand = {
+      command: "rg",
+      args: ["--color", "never", "--no-heading", "-e", ".", "--", fixturesPath],
+    };
+    const result = await executeRgCommand(cmd, {
+      maxOutputBytes: 10 * 1024 * 1024,
+    });
+    expect(result.truncatedByExecutor).toBeUndefined();
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout.length).toBeGreaterThan(0);
+  });
 });

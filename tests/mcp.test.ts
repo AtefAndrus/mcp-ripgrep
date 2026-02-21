@@ -152,6 +152,22 @@ describe("MCP integration", () => {
     expect(getTextContent(result)).toContain("universe");
   });
 
+  test("search-and-replace with multiline", async () => {
+    const result = await client.callTool({
+      name: "search-and-replace",
+      arguments: {
+        pattern: "function hello\\(\\) \\{\\n.*return (\\d+);\\n\\}",
+        replacement: "const hello = () => $1;",
+        path: fixturesPath,
+        multiline: true,
+        fileType: "ts",
+      },
+    });
+    expect(result.isError).toBeFalsy();
+    const text = getTextContent(result);
+    expect(text).toContain("const hello = () => 42;");
+  });
+
   test("search-count returns counts per file", async () => {
     const result = await client.callTool({
       name: "search-count",
@@ -165,6 +181,47 @@ describe("MCP integration", () => {
     const text = getTextContent(result);
     // Should contain file paths with counts
     expect(text).toMatch(/:\d+/);
+  });
+
+  test("search-count with sortBy=count sorts descending", async () => {
+    const result = await client.callTool({
+      name: "search-count",
+      arguments: {
+        pattern: ".",
+        path: fixturesPath,
+        sortBy: "count",
+      },
+    });
+    expect(result.isError).toBeFalsy();
+    const text = getTextContent(result);
+    const lines = text.split("\n").filter((l: string) => l.includes(":"));
+    const counts = lines.map((l: string) => {
+      const sep = l.lastIndexOf(":");
+      return Number(l.slice(sep + 1));
+    });
+    for (let i = 1; i < counts.length; i++) {
+      expect(counts[i]).toBeLessThanOrEqual(counts[i - 1]);
+    }
+  });
+
+  test("search-count with sortBy=path sorts alphabetically", async () => {
+    const result = await client.callTool({
+      name: "search-count",
+      arguments: {
+        pattern: ".",
+        path: fixturesPath,
+        sortBy: "path",
+      },
+    });
+    expect(result.isError).toBeFalsy();
+    const text = getTextContent(result);
+    const lines = text.split("\n").filter((l: string) => l.includes(":"));
+    const paths = lines.map((l: string) => {
+      const sep = l.lastIndexOf(":");
+      return l.slice(0, sep);
+    });
+    const sorted = [...paths].sort((a, b) => a.localeCompare(b));
+    expect(paths).toEqual(sorted);
   });
 
   test("search-count with Japanese pattern", async () => {

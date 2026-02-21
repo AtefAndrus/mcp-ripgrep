@@ -40,6 +40,7 @@ MCP クライアントの設定に以下を追加する:
 |---|---|
 | `--allow-dir <path>` | 検索対象を指定ディレクトリ配下に制限 (複数指定可) |
 | `--max-result-chars <number>` | 結果の最大文字数。超過時は行境界で切り詰める (デフォルト: 制限なし) |
+| `--max-output-bytes <number>` | ripgrep 出力の最大バイト数。超過時はプロセスを停止し結果を切り詰める (デフォルト: 20 MB) |
 
 起動オプション付きの設定例:
 
@@ -51,7 +52,8 @@ MCP クライアントの設定に以下を追加する:
       "args": [
         "@atef_andrus/mcp-ripgrep",
         "--allow-dir", "/home/user/project",
-        "--max-result-chars", "50000"
+        "--max-result-chars", "50000",
+        "--max-output-bytes", "20000000"
       ]
     }
   }
@@ -62,9 +64,9 @@ MCP クライアントの設定に以下を追加する:
 
 | ツール | 説明 |
 |---|---|
-| `search` | 正規表現・リテラル文字列・複数行マッチ・コンテキスト行・各種フィルタに対応したパターン検索。結果先頭にマッチ件数・ファイル数のサマリを付与 |
-| `search-and-replace` | 検索置換のプレビュー (読み取り専用。ファイルは変更しない) |
-| `search-count` | ファイルごとのマッチ数カウント (行数またはマッチ総数) |
+| `search` | 正規表現・リテラル文字列・複数行マッチ・OR マッチ・コンテキスト行・各種フィルタに対応したパターン検索。結果先頭にマッチ件数・ファイル数のサマリを付与 |
+| `search-and-replace` | 検索置換のプレビュー (読み取り専用)。複数行マッチ・キャプチャグループ ($1, ${name}) に対応 |
+| `search-count` | ファイルごとのマッチ数カウント (行数またはマッチ総数)。結果のソートに対応 |
 | `search-files` | パターンにマッチする/しないファイルの一覧 |
 | `list-files` | 検索スコープ内の全ファイル一覧 |
 | `list-file-types` | ripgrep がサポートするファイルタイプの一覧 |
@@ -84,6 +86,9 @@ MCP クライアントの設定に以下を追加する:
 | `followSymlinks` | シンボリックリンクを追跡する |
 | `maxDepth` | ディレクトリ探索の最大深度 |
 | `noIgnore` | .gitignore 等の無視ファイルを無視する |
+| `multiline` | 複数行マッチを有効にする (関数シグネチャ、import ブロック等) |
+| `additionalPatterns` | OR マッチ用の追加パターン (配列) |
+| `sortBy` | 結果のソート。search / search-files / list-files は `"path"` `"modified"` `"created"`、search-count は `"path"` `"count"` `"count-asc"` |
 | `maxCharacters` | 結果の最大文字数。超過時は行境界で切り詰め、サマリを付与 |
 
 ## 開発

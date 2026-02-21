@@ -31,11 +31,11 @@ src/
 ├── path-guard.ts     # パス検証 (--allow-dir)
 ├── truncate.ts       # 結果の文字数制限
 ├── stats.ts          # search の --stats 出力パース (サマリ抽出)
-├── format-result.ts  # ツール結果フォーマット (truncate + stderr 警告 + stats サマリ)
+├── format-result.ts  # ツール結果フォーマット (truncate + stderr 警告 + stats サマリ + executor truncation 警告)
 ├── rg/
 │   ├── types.ts      # 型定義 (RgSearchOptions, RgCommand, RgResult 等)
 │   ├── builder.ts    # 純粋関数: オプション → { command, args[] }
-│   └── executor.ts   # spawn 実行、exit code ハンドリング
+│   └── executor.ts   # spawn 実行、exit code ハンドリング、出力バイト数制限
 └── tools/            # 各ツールの registerTool 定義
     ├── search.ts
     ├── search-replace.ts
@@ -52,6 +52,7 @@ src/
 - `builder.ts` はシェルを介さず `spawn("rg", args)` 用の引数配列を構築する
 - パターンとパスは `--` セパレータの後に配置し、フラグインジェクションを防止する
 - `caseSensitive` 省略時は `-S` (smart-case) がデフォルト
+- `executor.ts` は stdout のバイト数を追跡し、`maxOutputBytes` (デフォルト 20 MB) 超過時に SIGTERM でプロセスを停止する
 
 ## テスト
 

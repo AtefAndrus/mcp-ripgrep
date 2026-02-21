@@ -3,7 +3,7 @@ import { z } from "zod";
 import { formatToolResult } from "../format-result.js";
 import { validatePath } from "../path-guard.js";
 import { buildSearchCommand } from "../rg/builder.js";
-import { executeRgCommand } from "../rg/executor.js";
+import { type ExecuteOptions, executeRgCommand } from "../rg/executor.js";
 import type { ServerConfig } from "../server.js";
 import { extractStats } from "../stats.js";
 
@@ -16,7 +16,7 @@ export function registerSearchTool(
     {
       title: "Ripgrep Search",
       description:
-        "Search file contents for a pattern using ripgrep. Supports regex, literal strings, multiline matching, and various filtering options. For large or unfamiliar codebases, consider using search-count or search-files first to assess the scope of matches.",
+        "Search file contents for a pattern using ripgrep. Supports regex, literal strings, multiline matching, OR matching via additionalPatterns, and various filtering options. For large or unfamiliar codebases, consider using search-count or search-files first to assess the scope of matches.",
       inputSchema: {
         pattern: z.string().describe("Search pattern (regex by default)"),
         path: z.string().describe("Directory or file to search"),
@@ -116,7 +116,10 @@ export function registerSearchTool(
       try {
         validatePath(args.path, config.allowedDirs);
         const cmd = buildSearchCommand(args);
-        const result = await executeRgCommand(cmd);
+        const execOpts: ExecuteOptions = {
+          maxOutputBytes: config.maxOutputBytes,
+        };
+        const result = await executeRgCommand(cmd, execOpts);
         const { content, summary } = extractStats(result.stdout);
         const cleanResult = { ...result, stdout: content };
         const limit = args.maxCharacters ?? config.defaultMaxCharacters;

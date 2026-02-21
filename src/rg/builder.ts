@@ -113,6 +113,7 @@ export function buildReplaceCommand(opts: RgReplaceOptions): RgCommand {
   appendCaseFlag(args, opts.caseSensitive);
   if (opts.fixedStrings) args.push("-F");
   if (opts.wordMatch) args.push("-w");
+  if (opts.multiline) args.push("-U", "--multiline-dotall");
   appendTypeFlags(args, opts.fileType, opts.fileTypeNot);
   appendGlobFlag(args, opts.glob);
   if (opts.maxResults !== undefined) args.push("-m", String(opts.maxResults));

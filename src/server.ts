@@ -13,6 +13,7 @@ const { version } = require("../package.json") as { version: string };
 export interface ServerConfig {
   allowedDirs?: string[];
   defaultMaxCharacters?: number;
+  maxOutputBytes?: number;
 }
 
 export function createServer(config?: ServerConfig): McpServer {

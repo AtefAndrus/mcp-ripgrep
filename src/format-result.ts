@@ -18,7 +18,11 @@ export function formatToolResult(
 
   parts.push(text);
 
-  if (truncated) {
+  if (result.truncatedByExecutor) {
+    parts.push(
+      "\n\n--- Output truncated (memory limit) ---\nThe output exceeded the maximum byte limit and was truncated.\nTip: Use fileType, glob, maxResults, or maxDepth to narrow the search scope.",
+    );
+  } else if (truncated) {
     parts.push(
       `\n\n--- Result truncated ---\nShowing: ${maxCharacters?.toLocaleString()} / ${originalLength.toLocaleString()} characters\nTip: Use fileType, glob, maxResults, or maxDepth to narrow the search scope.`,
     );

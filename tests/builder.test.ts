@@ -488,6 +488,27 @@ describe("buildReplaceCommand", () => {
     expect(cmd.args[gIndices[0] + 1]).toBe("*.ts");
     expect(cmd.args[gIndices[1] + 1]).toBe("!*.test.ts");
   });
+
+  test("multiline adds -U and --multiline-dotall", () => {
+    const cmd = buildReplaceCommand({
+      pattern: "fn.*\\{",
+      replacement: "function {",
+      path: "/tmp",
+      multiline: true,
+    });
+    expect(cmd.args).toContain("-U");
+    expect(cmd.args).toContain("--multiline-dotall");
+  });
+
+  test("no multiline flags when multiline is not set", () => {
+    const cmd = buildReplaceCommand({
+      pattern: "foo",
+      replacement: "bar",
+      path: "/tmp",
+    });
+    expect(cmd.args).not.toContain("-U");
+    expect(cmd.args).not.toContain("--multiline-dotall");
+  });
 });
 
 describe("buildCountCommand", () => {

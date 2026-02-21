@@ -30,6 +30,7 @@ export interface RgReplaceOptions {
   fixedStrings?: boolean;
   caseSensitive?: boolean;
   wordMatch?: boolean;
+  multiline?: boolean;
   fileType?: string | string[];
   glob?: string | string[];
   maxResults?: number;
@@ -94,4 +95,5 @@ export interface RgResult {
   stdout: string;
   stderr: string;
   exitCode: number;
+  truncatedByExecutor?: boolean;
 }

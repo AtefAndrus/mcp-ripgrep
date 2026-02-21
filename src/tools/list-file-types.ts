@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { formatToolResult } from "../format-result.js";
 import { buildListFileTypesCommand } from "../rg/builder.js";
-import { executeRgCommand } from "../rg/executor.js";
+import { type ExecuteOptions, executeRgCommand } from "../rg/executor.js";
 import type { ServerConfig } from "../server.js";
 
 export function registerListFileTypesTool(
@@ -27,7 +27,10 @@ export function registerListFileTypesTool(
     async (args) => {
       try {
         const cmd = buildListFileTypesCommand();
-        const result = await executeRgCommand(cmd);
+        const execOpts: ExecuteOptions = {
+          maxOutputBytes: config.maxOutputBytes,
+        };
+        const result = await executeRgCommand(cmd, execOpts);
         const limit = args.maxCharacters ?? config.defaultMaxCharacters;
         return formatToolResult(result, "", limit);
       } catch (error) {

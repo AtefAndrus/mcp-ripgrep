@@ -131,4 +131,35 @@ describe("formatToolResult", () => {
     );
     expect(getText(result)).toBe("file.ts:1:hello");
   });
+
+  test("shows executor truncation warning when truncatedByExecutor is true", () => {
+    const result = formatToolResult(
+      {
+        stdout: "partial output",
+        stderr: "",
+        exitCode: 0,
+        truncatedByExecutor: true,
+      },
+      "No matches found.",
+    );
+    const text = getText(result);
+    expect(text).toContain("--- Output truncated (memory limit) ---");
+    expect(text).toContain("maximum byte limit");
+  });
+
+  test("executor truncation takes precedence over character truncation", () => {
+    const result = formatToolResult(
+      {
+        stdout: "partial output",
+        stderr: "",
+        exitCode: 0,
+        truncatedByExecutor: true,
+      },
+      "No matches found.",
+      5,
+    );
+    const text = getText(result);
+    expect(text).toContain("--- Output truncated (memory limit) ---");
+    expect(text).not.toContain("--- Result truncated ---");
+  });
 });

@@ -3,8 +3,32 @@ import { z } from "zod";
 import { formatToolResult } from "../format-result.js";
 import { validatePath } from "../path-guard.js";
 import { buildCountCommand } from "../rg/builder.js";
-import { executeRgCommand } from "../rg/executor.js";
+import { type ExecuteOptions, executeRgCommand } from "../rg/executor.js";
 import type { ServerConfig } from "../server.js";
+
+type SortMode = "path" | "count" | "count-asc";
+
+function sortCountOutput(output: string, mode: SortMode): string {
+  const lines = output.split("\n").filter((l) => l.length > 0);
+  const parsed = lines.map((line) => {
+    const sep = line.lastIndexOf(":");
+    return {
+      path: line.slice(0, sep),
+      count: Number(line.slice(sep + 1)),
+      raw: line,
+    };
+  });
+
+  if (mode === "path") {
+    parsed.sort((a, b) => a.path.localeCompare(b.path));
+  } else if (mode === "count") {
+    parsed.sort((a, b) => b.count - a.count);
+  } else {
+    parsed.sort((a, b) => a.count - b.count);
+  }
+
+  return parsed.map((p) => p.raw).join("\n");
+}
 
 export function registerSearchCountTool(
   server: McpServer,
@@ -60,6 +84,12 @@ export function registerSearchCountTool(
           .boolean()
           .optional()
           .describe("Ignore .gitignore and other ignore files"),
+        sortBy: z
+          .enum(["path", "count", "count-asc"])
+          .optional()
+          .describe(
+            "Sort results: 'path' (alphabetical), 'count' (descending), 'count-asc' (ascending)",
+          ),
         maxCharacters: z
           .number()
           .optional()
@@ -72,7 +102,13 @@ export function registerSearchCountTool(
       try {
         validatePath(args.path, config.allowedDirs);
         const cmd = buildCountCommand(args);
-        const result = await executeRgCommand(cmd);
+        const execOpts: ExecuteOptions = {
+          maxOutputBytes: config.maxOutputBytes,
+        };
+        const result = await executeRgCommand(cmd, execOpts);
+        if (args.sortBy && result.stdout) {
+          result.stdout = sortCountOutput(result.stdout, args.sortBy);
+        }
         const limit = args.maxCharacters ?? config.defaultMaxCharacters;
         return formatToolResult(result, "No matches found.", limit);
       } catch (error) {

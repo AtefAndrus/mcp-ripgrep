@@ -3,7 +3,7 @@ import { z } from "zod";
 import { formatToolResult } from "../format-result.js";
 import { validatePath } from "../path-guard.js";
 import { buildReplaceCommand } from "../rg/builder.js";
-import { executeRgCommand } from "../rg/executor.js";
+import { type ExecuteOptions, executeRgCommand } from "../rg/executor.js";
 import type { ServerConfig } from "../server.js";
 
 export function registerSearchReplaceTool(
@@ -35,6 +35,12 @@ export function registerSearchReplaceTool(
             "true = case-sensitive, false = case-insensitive, omit = smart-case",
           ),
         wordMatch: z.boolean().optional().describe("Only match whole words"),
+        multiline: z
+          .boolean()
+          .optional()
+          .describe(
+            "Enable multiline matching (for function signatures, import blocks, etc.)",
+          ),
         fileType: z
           .union([z.string(), z.array(z.string())])
           .optional()
@@ -67,7 +73,9 @@ export function registerSearchReplaceTool(
         onlyMatching: z
           .boolean()
           .optional()
-          .describe("Show only the replaced text instead of the full line"),
+          .describe(
+            "Show only the matched/replaced text instead of the full line (useful for extracting captured groups)",
+          ),
         maxCharacters: z
           .number()
           .optional()
@@ -80,7 +88,10 @@ export function registerSearchReplaceTool(
       try {
         validatePath(args.path, config.allowedDirs);
         const cmd = buildReplaceCommand(args);
-        const result = await executeRgCommand(cmd);
+        const execOpts: ExecuteOptions = {
+          maxOutputBytes: config.maxOutputBytes,
+        };
+        const result = await executeRgCommand(cmd, execOpts);
         const limit = args.maxCharacters ?? config.defaultMaxCharacters;
         return formatToolResult(result, "No matches found.", limit);
       } catch (error) {
